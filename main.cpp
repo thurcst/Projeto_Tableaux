@@ -2,6 +2,9 @@
 #include <bits/stdc++.h>
 #include <string>
 #include <iostream>
+#include <vector>
+#include <fstream>
+#include <cstring>
 
 #define endl '\n'
 
@@ -16,6 +19,7 @@ vector <Node*> applyRule(Node* node) {
      * pega o valor verdade;
      * aplica a regra
      */
+
     if(node->getExpression() == "((~Q) > (~P))" && node->getTruthValue() == 1) {
         insertedNodes = node->insertSides("(~Q)", 0, "(~P)", 1);
     }
@@ -89,6 +93,10 @@ char achar_operador(string expressao){
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
+    // ---- Arquivos ----
+    ifstream entrada;
+    ofstram saida;
+
 
     // ---- variaveis ----
     string enunciados[1000], proposicao[1000];
