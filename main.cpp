@@ -100,11 +100,16 @@ int main() {
 
     // ---- variaveis ----
     string enunciados[1000], proposicao[1000];
-    int problema[1000], n_enunciados;
+    int problema[1000], n_enunciados, cursor, icursor;
     char operador_principal;
+    Node arvore;
     
     cin >> n_enunciados;
     cin.ignore(); //ignorar o "\n" depois do n de enunciados
+    saida.open("./inout/Saida.out");
+    entrada.open("./inout/Entrada.in");
+    entrada >> cursor;
+    icursor = cursor;
 
     for(int i = 0; i < n_enunciados;i++){
         getline(cin,enunciados[i], '\n'); //recebe a linha ate o "\n"
@@ -157,10 +162,10 @@ int main() {
             }
             else if(problema[i] == 4){
                 Node tableaux = Node(proposicao[i],true);
-                operador principal = achar_operador(tableaux.expression);
+                operador_principal = achar_operador(tableaux.expression);
             }
             else{
-                printf("Caso em andamento...");
+                Node tableaux = Node(proposicao[i],true);
             }
     }
     //criar o primeiro nó.
