@@ -220,16 +220,33 @@ int main() {
                 Node tableaux = Node(proposicao[i],false);
                 arvore = tableaux;
                 string conjunto_expr;
+                string vet_auxiliar[1000];
                 vector <Node *> auxiliar;
                 size_t posic = enunciados[i].find('{');
                 size_t lastposc = enunciados[i].rfind('}');
+                int cnt_ajd = 0;
+                int cnt_total = 0;
                 for(int ate_la = posic + 1; ate_la < lastposc;ate_la++){
                     conjunto_expr.push_back(enunciados[i][ate_la]);
                 }
-                
-                while(conjunto_expr.length() > 0 && !arvore.isClosed()){
-                    auxiliar = arvore.insertFront(proposicao[i],true);
-                    conjunto_expr = corrige_conjunto(conjunto_expr);
+                cnt_total = conjunto_expr.length();
+                while(cnt_ajd != cnt_total && conjunto_expr.length() > 0 && !arvore.isClosed()){
+                    for(int ajd = 0; ajd < conjunto_expr.length();ajd++){
+                        cnt_ajd++;
+                        /*vamos percorrer o vetor e sempre que acharmos uma , pulamos ela e passamos pra proxima posicao do vector auxiliar
+                            Por exemplo, no conjunto {(Q v P), Q,(J & P)} o vector vai ficar
+                            auxiliar[0] = (Q v P)
+                            auxiliar[1] = Q
+                            auxiliar[2] = (J & P)
+                        */
+                        if(conjunto_expr[ajd]==','){
+                            ajd++;
+                        }
+                        else{
+                            vet_auxiliar[ajd]+=conjunto_expr[ajd];
+                        }
+                        auxiliar = arvore.insertFront(vet_auxiliar[ajd],true);
+                    }
                     if(auxiliar[0]->checkContradiction()){
                         auxiliar[0]->markContradiction();
                     }
