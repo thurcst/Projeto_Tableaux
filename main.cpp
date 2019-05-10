@@ -220,7 +220,7 @@ int main() {
                 Node tableaux = Node(proposicao[i],false);
                 arvore = tableaux;
                 string conjunto_expr;
-                vector <Node *> inserir;
+                vector <Node *> auxiliar;
                 size_t posic = enunciados[i].find('{');
                 size_t lastposc = enunciados[i].rfind('}');
                 for(int ate_la = posic + 1; ate_la < lastposc;ate_la++){
@@ -228,12 +228,16 @@ int main() {
                 }
                 
                 while(conjunto_expr.length() > 0 && !arvore.isClosed()){
-                    //continua nos proximos episodios...
+                    auxiliar = arvore.insertFront(proposicao[i],true);
+                    conjunto_expr = corrige_conjunto(conjunto_expr);
+                    if(auxiliar[0]->checkContradiction()){
+                        auxiliar[0]->markContradiction();
+                    }
+                    auxiliar.clear();
                 }
             }
 
             while(!arvore.isClosed() && !arvore.getAppliableNodes().empty()) {
-                //Corrigir nomes e revisar funcionalidade...
                 appNodes.clear();
                 folhas.clear();
                 
@@ -241,23 +245,26 @@ int main() {
                 appNodes = byPreference(arvore.getAppliableNodes());
 
                 for(int aux=0; aux < appNodes.size(); aux++) {
+                    //atualizar o vetor de proposicao pra ordem correta
                     proposicao[i] = appNodes[aux]->getExpression();
                     valor = appNodes[aux]->getTruthValue();
                     operador_principal = achar_operador(proposicao[i]);
                     
                     if(operador_principal == '~'){
                         string_ngd="";
-                        string_ngd = nega_prop(proposicao[i]);
+                        string_ngd = nega_prop(proposicao[i]); //negamos a prop caso o perador principal seja '~'
                         folhas = appNodes[aux]->insertFront(string_ngd, !valor);
                     }
                     else if(operador_principal == '&') {
                         substring_1="";
                         substring_2="";
-                        achar_subExpr(proposicao[i], &substring_1, &substring_2);
+                        achar_subExpr(proposicao[i], &substring_1, &substring_2);//dividimos a expressao em duas subexpressores
                         if(valor){
+                            //caso seja true, ambos sao verdade, nao bifurca
                            folhas = appNodes[aux]->insertFront(substring_1, valor, substring_2, valor); 
                         } 
                         else{
+                            //caso contrario, bifurca a arvore para caso sbst1 seja 0 ou sbst2 seja 0
                             folhas = appNodes[aux]->insertSides(substring_1, valor, substring_2, valor);
                         }
                     }
