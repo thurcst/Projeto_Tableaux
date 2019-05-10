@@ -146,7 +146,8 @@ int main() {
     // ---- Arquivos ----
     ifstream entrada;
     ofstream saida;
-
+    saida.open("./inout/Saida.out");
+    entrada.open("./inout/Entrada.in");
 
     // ---- variaveis ----
     string enunciados[1000], proposicao[1000]; //vetor enunciado recebe pergunta / vetor proposicao apenas as proposicoes (substrings da pergunta)
@@ -156,15 +157,15 @@ int main() {
     bool valor;
     Node arvore("",false);
     vector <Node *> appNodes, folhas;
-    saida.open("./inout/Saida.out");
-    entrada.open("./inout/Entrada.in");
 
     entrada >> n_enunciados;
     restantes = n_enunciados;
     cin.ignore(); //ignorar o "\n" depois do n de enunciados
+
     for(int aux = 0; aux < n_enunciados; aux++){
         getline(entrada,enunciados[aux],'\n');
     }
+    
     entrada.close();
 
     for(int i = 0; i < n_enunciados;i++){
