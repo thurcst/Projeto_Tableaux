@@ -115,12 +115,12 @@ void achar_subExpr(string expressao, string *substring1, string *substring2){
 
 string nega_prop(string expressao){
     int aux = 2;
-    size_t achei = expressao.find("~");
+    size_t achei = expressao.find('~');
     int aux2 = achei;
     int par_esq = 0, par_dir = 0;
     string nova_expressao;
     if(expressao[1]!= '('){
-        while(aux < expressao.length() && expressao[aux]!= ")"){
+        while(aux < expressao.length() && expressao[aux]!= ')'){
             nova_expressao+=expressao[aux];
             aux++;
         }
@@ -169,7 +169,7 @@ int main() {
     for(int i = 0; i < n_enunciados;i++){
         if(enunciados[i][0] == '('){
             //se o enunciado começa com (
-            size_t ret = enunciados[i].rfind(")");//procuramos até a ultima ocorrencia do )
+            size_t ret = enunciados[i].rfind(')');//procuramos até a ultima ocorrencia do )
             for(int j = 0; j <= ret; j++){
                 proposicao[i].push_back(enunciados[i][j]);
             }
@@ -221,8 +221,8 @@ int main() {
                 arvore = tableaux;
                 string conjunto_expr;
                 vector <Node *> inserir;
-                size_t posic = enunciados[i].find("{");
-                size_t lastposc = enunciados[i].rfind("}");
+                size_t posic = enunciados[i].find('{');
+                size_t lastposc = enunciados[i].rfind('}');
                 for(int ate_la = posic + 1; ate_la < lastposc;ate_la++){
                     conjunto_expr.push_back(enunciados[i][ate_la]);
                 }
