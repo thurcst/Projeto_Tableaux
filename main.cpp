@@ -122,7 +122,8 @@ int main() {
 
 
     // ---- variaveis ----
-    string enunciados[1000], proposicao[1000];
+    string enunciados[1000], proposicao[1000]; //vetor enunciado recebe pergunta / vetor proposicao apenas as proposicoes (substrings da pergunta)
+    string substring_1,substring_2, string_ngd;//ngd = negada
     int problema[1000], n_enunciados, cursor, icursor;
     char operador_principal;
     Node arvore;
@@ -198,7 +199,55 @@ int main() {
                 }
                 
                 while(conjunto_expr.length() > 0 && !arvore.isClosed()){
+                    //continua nos proximos episodios...
+                }
+            }
 
+            while(!arvore.isClosed() && !arvore.getAppliableNodes().empty()) {
+                //Corrigir nomes e revisar funcionalidade...
+                appNodes.clear();
+                leafs.clear();
+                
+                // ordena nos aplicaveis pondo os que bifurcam por ultimo
+                appNodes = sortNodes(arvore.getAppliableNodes());
+
+                for(k=0; k<appNodes.size(); k++) {
+                    expr = appNodes[k]->getExpression();
+                    v = appNodes[k]->getTruthValue();
+                    op = getOperator(expr);
+                    if(op == '~') {
+                        neg="";
+                        neg = getNegacao(expr);
+                        leafs = appNodes[k]->insertFront(neg, !v);
+                    }
+                    else if(op == '&') {
+                        sub1="";
+                        sub2="";
+                        getSubExpr(expr, &sub1, &sub2);
+                        if(v) leafs = appNodes[k]->insertFront(sub1, v, sub2, v);
+                        else leafs = appNodes[k]->insertSides(sub1, v, sub2, v);
+                    }
+                    else if(op == 'v') {
+                        sub1="";
+                        sub2="";
+                        getSubExpr(expr, &sub1, &sub2);
+                        
+                        if(!v) leafs = appNodes[k]->insertFront(sub1, v, sub2, v);
+                        else leafs = appNodes[k]->insertSides(sub1, v, sub2, v);
+                    }
+                    else if(op == '>') {
+                        sub1="";
+                        sub2="";
+                        getSubExpr(expr, &sub1, &sub2);
+                        if(!v) leafs = appNodes[k]->insertFront(sub1, !v, sub2, v);
+                        else leafs = appNodes[k]->insertSides(sub1, !v, sub2, v);
+                    }
+                    for(a=0; a<leafs.size(); a++) {
+                        if(leafs[a]->checkContradiction()){
+                            leafs[a]->markContradiction();
+                        }    
+                    }
+                    appNodes[k]->markApplied();
                 }
             }
 
