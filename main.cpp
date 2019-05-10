@@ -126,16 +126,17 @@ int main() {
     int problema[1000], n_enunciados, cursor, icursor;
     char operador_principal;
     Node arvore;
-    
-    cin >> n_enunciados;
-    cin.ignore(); //ignorar o "\n" depois do n de enunciados
     saida.open("./inout/Saida.out");
     entrada.open("./inout/Entrada.in");
-    entrada >> cursor;
-    icursor = cursor;
 
-    for(int i = 0;icursor > 0 && i < n_enunciados;i++){
-        getline(cin,enunciados[i], '\n'); //recebe a linha ate o "\n"
+    entrada >> n_enunciados;
+    cin.ignore(); //ignorar o "\n" depois do n de enunciados
+    for(int aux = 0; aux < n_enunciados; aux++){
+        getline(entrada,enunciados[aux],'\n');
+    }
+    entrada.close();
+
+    for(int i = 0; i < n_enunciados;i++){
         if(enunciados[i][0] == '('){
             //se o enunciado começa com (
             size_t ret = enunciados[i].rfind(")");//procuramos até a ultima ocorrencia do )
@@ -261,7 +262,5 @@ int main() {
     }
 */
     saida.close();
-    entrada.close();
-
     return 0;
 }
