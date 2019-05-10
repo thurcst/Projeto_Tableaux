@@ -151,7 +151,7 @@ int main() {
     // ---- variaveis ----
     string enunciados[1000], proposicao[1000]; //vetor enunciado recebe pergunta / vetor proposicao apenas as proposicoes (substrings da pergunta)
     string substring_1,substring_2, string_ngd;//ngd = negada
-    int problema[1000], n_enunciados, cursor, icursor;
+    int problema[1000], n_enunciados, restantes;
     char operador_principal;
     bool valor;
     Node arvore("",false);
@@ -160,6 +160,7 @@ int main() {
     entrada.open("./inout/Entrada.in");
 
     entrada >> n_enunciados;
+    restantes = n_enunciados;
     cin.ignore(); //ignorar o "\n" depois do n de enunciados
     for(int aux = 0; aux < n_enunciados; aux++){
         getline(entrada,enunciados[aux],'\n');
@@ -227,6 +228,7 @@ int main() {
                 int cnt_ajd = 0;
                 int cnt_total = 0;
                 for(int ate_la = posic + 1; ate_la < lastposc;ate_la++){
+                    //recebe em conjunto_expr todas as expressoes dentro dos {}
                     conjunto_expr.push_back(enunciados[i][ate_la]);
                 }
                 cnt_total = conjunto_expr.length();
@@ -291,9 +293,11 @@ int main() {
                         achar_subExpr(proposicao[i], &substring_1, &substring_2);
                         
                         if(!valor){
+                            //caso o ou seja falto, ambas sao falsas, nao bifurca
                             folhas = appNodes[aux]->insertFront(substring_1, valor, substring_2, valor);
                         } 
                         else{
+                            //caso contrario, uma da sduas e verdadeira, bifurcaçao
                             folhas = appNodes[aux]->insertSides(substring_1, valor, substring_2, valor);
                         } 
                     }
@@ -302,9 +306,11 @@ int main() {
                         substring_2="";
                         achar_subExpr(proposicao[i], &substring_1, &substring_2);
                         if(!valor){
+                            //caso seja falso, nao bifurca, substring 1 e verdadeira e substring2 e falsa;
                             folhas = appNodes[aux]->insertFront(substring_1, !valor, substring_1, valor);
                         } 
                         else{
+                            //caso seja verdadeiro, bifurca em casos de substring 1 ser falso e substring 2 ser verdadeiro
                             folhas = appNodes[aux]->insertSides(substring_1, !valor, substring_2, valor);
                         } 
                     }
@@ -360,11 +366,10 @@ int main() {
                 }
             }
 
-            icursor--;
-            if(icursor > 0) saida << endl;
+            restantes--;
+            if(restantes > 0) saida << endl;
 
     }
-
     saida.close();
     return 0;
 }
