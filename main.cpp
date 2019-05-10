@@ -126,6 +126,7 @@ int main() {
     string substring_1,substring_2, string_ngd;//ngd = negada
     int problema[1000], n_enunciados, cursor, icursor;
     char operador_principal;
+    bool valor;
     Node arvore;
     saida.open("./inout/Saida.out");
     entrada.open("./inout/Entrada.in");
@@ -211,34 +212,34 @@ int main() {
                 // ordena nos aplicaveis pondo os que bifurcam por ultimo
                 appNodes = sortNodes(arvore.getAppliableNodes());
 
-                for(k=0; k<appNodes.size(); k++) {
-                    expr = appNodes[k]->getExpression();
-                    v = appNodes[k]->getTruthValue();
-                    op = getOperator(expr);
+                for(int k=0; k < appNodes.size(); k++) {
+                    proposicao[i] = appNodes[k]->getExpression();
+                    valor = appNodes[k]->getTruthValue();
+                    operador = achar_operador(proposicao[i]);
                     if(op == '~') {
                         neg="";
-                        neg = getNegacao(expr);
+                        neg = getNegacao(proposicao[i]);
                         leafs = appNodes[k]->insertFront(neg, !v);
                     }
                     else if(op == '&') {
                         sub1="";
                         sub2="";
-                        getSubExpr(expr, &sub1, &sub2);
+                        achar_subExpr(proposicao[i], &sub1, &sub2);
                         if(v) leafs = appNodes[k]->insertFront(sub1, v, sub2, v);
                         else leafs = appNodes[k]->insertSides(sub1, v, sub2, v);
                     }
                     else if(op == 'v') {
-                        sub1="";
-                        sub2="";
-                        getSubExpr(expr, &sub1, &sub2);
+                        substring_1="";
+                        substring_2="";
+                        achar_subExpr(proposicao[i], &sub1, &sub2);
                         
                         if(!v) leafs = appNodes[k]->insertFront(sub1, v, sub2, v);
                         else leafs = appNodes[k]->insertSides(sub1, v, sub2, v);
                     }
                     else if(op == '>') {
-                        sub1="";
-                        sub2="";
-                        getSubExpr(expr, &sub1, &sub2);
+                        substring_1="";
+                        substring_2="";
+                        achar_subExpr(proposicao[i], &sub1, &sub2);
                         if(!v) leafs = appNodes[k]->insertFront(sub1, !v, sub2, v);
                         else leafs = appNodes[k]->insertSides(sub1, !v, sub2, v);
                     }
@@ -299,17 +300,6 @@ int main() {
 
     }
 
-/*    vector <Node*> appliableNodes = tableau.getAppliableNodes();
-    while(!tableau.isClosed() && !appliableNodes.empty()) {
-        //for(Node* node : appliableNodes) {
-        //}
-        for(int i = 0; i < appliableNodes.size(); i++) {
-            vector <Node*> insertedNodes = applyRule(appliableNodes[i]);
-            checkContradictions(insertedNodes);
-            appliableNodes = tableau.getAppliableNodes();
-        }
-    }
-*/
     saida.close();
     return 0;
 }
