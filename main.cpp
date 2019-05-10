@@ -10,27 +10,28 @@
 
 using namespace std;
 
-// Aplicar regras.
-vector <Node*> applyRule(Node* node) {
-    vector <Node*> insertedNodes;
+// Ordena o vetor por preferencia de nao bifurcaçao
+vector <Node*> byPreference(vector <Node *> arvore) {
+    vector <Node*> no_organizado;
+    char operador;
+    bool valor;
+    for (int aux =0; aux < arvore.size(); aux ++){
+        operador = achar_operador(arvore[aux]->getExpression());
+        valor = arvore[aux]->getTruthValue();
 
-    /*
-     * pega operador principal;
-     * pega o valor verdade;
-     * aplica a regra
-     */
+        if((operador == 'v' && valor == false) || (operador == '&' && valor == true) || (operador == '>' && valor == false) || operador == '~'){
+            no_organizado.insert(no_organizado.begin(),arvore[aux]);
+            //se for uma dessas regras, colocamos no começo
+        }
+        else{
+            no_organizado.push_back(arvore[aux]);
+            //caso nao seja, colocamos no final
+        }
+        return no_organizado;
+    }
+    
 
-    if(node->getExpression() == "((~Q) > (~P))" && node->getTruthValue() == 1) {
-        insertedNodes = node->insertSides("(~Q)", 0, "(~P)", 1);
-    }
-    else if(node->getExpression() == "(~Q)" && node->getTruthValue() == 0) {
-        insertedNodes = node->insertFront("Q", 1);
-    }
-    else if(node->getExpression() == "(~P)" && node->getTruthValue() == 1) {
-        insertedNodes = node->insertFront("P", 0);
-    }
-    node->markApplied();
-    return insertedNodes;
+
 }
 
 int achar_problema(string frase){
@@ -44,23 +45,23 @@ int achar_problema(string frase){
     int problema;
     if(frase.find("tautologia")!= string::npos){
         //se achar "tautologia" na string, o problema é saber se é tautologia
-        problema = 1
+        problema = 1;
         }
     else if(frase.find("refutavel")!= string::npos){
         //se achar "refutavel" na string, o problema é saber se é refutável
-        problema = 2
+        problema = 2;
     }
     else if(frase.find("insatisfativel")!= string::npos){
         //se achar "insatisfativel" na string, o problema é saber se é insat.
         //procuramos insat antes de satisfativel pois satisfativel e uma substring de insatisfativel
-        problema = 3
+        problema = 3;
         }
     else if(frase.find("satisfativel")!= string::npos){
         //se achar "satisfativel" na string, o problema é saber se é sat.
-        problema = 4
+        problema = 4;
     }
     else if(frase.find("consequencia logica de")!= string::npos){ 
-        problema = 5
+        problema = 5;
         }
         return problema;
 }
@@ -102,13 +103,39 @@ void achar_subExpr(string expressao, string *substring1, string *substring2){
             else if(expressao[j] == ')'){
                 par_dir++;
             }
-            *substring1.push_back(expressao[j]);
+            *substring1+=expressao[j];
         }
         i+=4;
     }
-    for(i;i<expressao[i].size()-1;i++){
+    for(i;i < expressao.size()-1;i++){
         //copiamos o resto da string ate o ultimo parentesis* (ignoramos o ultimo parentesis por ser da expressao completa)
-        *substring2.push_back(expressao[i]);
+        *substring2+= expressao[i];
+    }
+}
+
+string nega_prop(string expressao){
+    int aux = 2;
+    size_t achei = expressao.find("~");
+    int aux2 = achei;
+    int par_esq = 0, par_dir = 0;
+    string nova_expressao;
+    if(expressao[1]!= '('){
+        while(aux < expressao.length() && expressao[aux]!= ")"){
+            nova_expressao+=expressao[aux];
+            aux++;
+        }
+    }
+    else{
+        while(aux2 < expressao.length() && par_esq!=par_dir){
+            if(expressao[aux2] == '('){
+                par_esq++;
+            }
+            else if(expressao[aux2] == ')'){
+                par_dir++;
+            }
+            nova_expressao+=expressao[aux2];
+            aux2++;
+        }
     }
 }
 
@@ -118,7 +145,7 @@ int main() {
 
     // ---- Arquivos ----
     ifstream entrada;
-    ofstram saida;
+    ofstream saida;
 
 
     // ---- variaveis ----
@@ -127,7 +154,8 @@ int main() {
     int problema[1000], n_enunciados, cursor, icursor;
     char operador_principal;
     bool valor;
-    Node arvore;
+    Node arvore("",false);
+    vector <Node *> appNodes, folhas;
     saida.open("./inout/Saida.out");
     entrada.open("./inout/Entrada.in");
 
@@ -168,27 +196,27 @@ int main() {
 
             if(problema[i] == 1){
                 //se for problema de tautologia
-                Node tableaux = Node(proposicao[i],false);
+                Node tableaux(proposicao[i],false);
                 arvore = tableaux;
                 }
             else if(problema[i] == 2){
                 //se for problema de refutabilidade
-                Node tableaux = Node(proposicao[i],false);
+                Node tableaux(proposicao[i],false);
                 arvore = tableaux;
                 }
 
             else if(problema[i] == 3){
                 //se for problema de insatisfatibilidade
-                Node tableaux = Node(proposicao[i],true);
+                Node tableaux(proposicao[i],true);
                 arvore = tableaux;
                 }
             else if(problema[i] == 4){
                 //se for problema de satisfatibilidade
-                Node tableaux = Node(proposicao[i],true);
+                Node tableaux(proposicao[i],true);
                 arvore = tableaux;
                 }
             else{
-                //se for pboelam de consequencia logica
+                //se for problema de consequencia logica
                 Node tableaux = Node(proposicao[i],false);
                 arvore = tableaux;
                 string conjunto_expr;
@@ -196,7 +224,7 @@ int main() {
                 size_t posic = enunciados[i].find("{");
                 size_t lastposc = enunciados[i].rfind("}");
                 for(int ate_la = posic + 1; ate_la < lastposc;ate_la++){
-                    conjunto_expr.push_back(enunciados[ate_la]);
+                    conjunto_expr.push_back(enunciados[i][ate_la]);
                 }
                 
                 while(conjunto_expr.length() > 0 && !arvore.isClosed()){
@@ -207,48 +235,61 @@ int main() {
             while(!arvore.isClosed() && !arvore.getAppliableNodes().empty()) {
                 //Corrigir nomes e revisar funcionalidade...
                 appNodes.clear();
-                leafs.clear();
+                folhas.clear();
                 
-                // ordena nos aplicaveis pondo os que bifurcam por ultimo
-                appNodes = sortNodes(arvore.getAppliableNodes());
+                //De acordo com a preferencia, os nos que bifurcam tem menos preferencia, entao eles ficma por ultimo
+                appNodes = byPreference(arvore.getAppliableNodes());
 
-                for(int k=0; k < appNodes.size(); k++) {
-                    proposicao[i] = appNodes[k]->getExpression();
-                    valor = appNodes[k]->getTruthValue();
-                    operador = achar_operador(proposicao[i]);
-                    if(op == '~') {
-                        neg="";
-                        neg = getNegacao(proposicao[i]);
-                        leafs = appNodes[k]->insertFront(neg, !v);
+                for(int aux=0; aux < appNodes.size(); aux++) {
+                    proposicao[i] = appNodes[aux]->getExpression();
+                    valor = appNodes[aux]->getTruthValue();
+                    operador_principal = achar_operador(proposicao[i]);
+                    
+                    if(operador_principal == '~'){
+                        string_ngd="";
+                        string_ngd = nega_prop(proposicao[i]);
+                        folhas = appNodes[aux]->insertFront(string_ngd, !valor);
                     }
-                    else if(op == '&') {
-                        sub1="";
-                        sub2="";
-                        achar_subExpr(proposicao[i], &sub1, &sub2);
-                        if(v) leafs = appNodes[k]->insertFront(sub1, v, sub2, v);
-                        else leafs = appNodes[k]->insertSides(sub1, v, sub2, v);
-                    }
-                    else if(op == 'v') {
+                    else if(operador_principal == '&') {
                         substring_1="";
                         substring_2="";
-                        achar_subExpr(proposicao[i], &sub1, &sub2);
+                        achar_subExpr(proposicao[i], &substring_1, &substring_2);
+                        if(valor){
+                           folhas = appNodes[aux]->insertFront(substring_1, valor, substring_2, valor); 
+                        } 
+                        else{
+                            folhas = appNodes[aux]->insertSides(substring_1, valor, substring_2, valor);
+                        }
+                    }
+                    else if(operador_principal == 'v') {
+                        substring_1="";
+                        substring_2="";
+                        achar_subExpr(proposicao[i], &substring_1, &substring_2);
                         
-                        if(!v) leafs = appNodes[k]->insertFront(sub1, v, sub2, v);
-                        else leafs = appNodes[k]->insertSides(sub1, v, sub2, v);
+                        if(!valor){
+                            folhas = appNodes[aux]->insertFront(substring_1, valor, substring_2, valor);
+                        } 
+                        else{
+                            folhas = appNodes[aux]->insertSides(substring_1, valor, substring_2, valor);
+                        } 
                     }
-                    else if(op == '>') {
+                    else if(operador_principal == '>') {
                         substring_1="";
                         substring_2="";
-                        achar_subExpr(proposicao[i], &sub1, &sub2);
-                        if(!v) leafs = appNodes[k]->insertFront(sub1, !v, sub2, v);
-                        else leafs = appNodes[k]->insertSides(sub1, !v, sub2, v);
+                        achar_subExpr(proposicao[i], &substring_1, &substring_2);
+                        if(!valor){
+                            folhas = appNodes[aux]->insertFront(substring_1, !valor, substring_1, valor);
+                        } 
+                        else{
+                            folhas = appNodes[aux]->insertSides(substring_1, !valor, substring_2, valor);
+                        } 
                     }
-                    for(a=0; a<leafs.size(); a++) {
-                        if(leafs[a]->checkContradiction()){
-                            leafs[a]->markContradiction();
+                    for(int aux2 = 0; aux2 < folhas.size(); aux2++) {
+                        if(folhas[aux2]->checkContradiction()){
+                            folhas[aux2]->markContradiction();
                         }    
                     }
-                    appNodes[k]->markApplied();
+                    appNodes[aux]->markApplied();
                 }
             }
 
