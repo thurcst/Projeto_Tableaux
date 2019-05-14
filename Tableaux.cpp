@@ -19,19 +19,18 @@ void achar_subExpr(string expressao, string *substring1, string *substring2);
 
 
 int main() {
-    ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
     // ---- Arquivos ----
     ifstream entrada;
     ofstream saida;
-    saida.open("./inout/Saida.out");
-    entrada.open("./inout/Entrada.in");
-
+    saida.open("Saida.out");
+    entrada.open("testzada.in");
+    
     // ---- variaveis ----
-    string enunciados[1000], proposicao[1000]; //vetor enunciado recebe pergunta / vetor proposicao apenas as proposicoes (substrings da pergunta)
+    string enunciados[(int)1e4], proposicao[(int)1e4]; //vetor enunciado recebe pergunta / vetor proposicao apenas as proposicoes (substrings da pergunta)
     string substring_1,substring_2, string_ngd;//ngd = negada
-    int problema[1000], n_enunciados, restantes;
+    int problema[1001], n_enunciados, restantes;
     char operador_principal;
     bool valor;
     Node arvore("",false);
@@ -39,16 +38,16 @@ int main() {
 
     entrada >> n_enunciados;
     restantes = n_enunciados;
-    cin.ignore(); //ignorar o "\n" depois do n de enunciados
+    entrada.ignore(); //ignorar o "\n" depois do n de enunciados
 
     for(int aux = 0; aux < n_enunciados; aux++){
-        getline(entrada,enunciados[aux],'\n');
+        getline(entrada,enunciados[aux]);
     }
-    
     entrada.close();
-
     for(int i = 0; i < n_enunciados;i++){
         if(enunciados[i][0] == '('){
+            /*AQUI TA O PROBLEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            Em problemas de consequencia lógica ele corre até o FODENOD ULTIMO ')' e por isso ele copia uma expressao INTEIRA pra o vetor.*/
             //se o enunciado começa com (
             size_t ret = enunciados[i].rfind(')');//procuramos até a ultima ocorrencia do )
             for(int j = 0; j <= ret; j++){
@@ -103,8 +102,8 @@ int main() {
                 string conjunto_expr;
                 string vet_auxiliar[1000];
                 vector <Node *> auxiliar;
-                size_t posic = enunciados[i].find('{');
-                size_t lastposc = enunciados[i].rfind('}');
+                int posic = enunciados[i].find('{');
+                int lastposc = enunciados[i].rfind('}');
                 int cnt_ajd = 0;
                 int cnt_total = 0;
                 for(int ate_la = posic + 1; ate_la < lastposc;ate_la++){
@@ -112,27 +111,25 @@ int main() {
                     conjunto_expr.push_back(enunciados[i][ate_la]);
                 }
                 cnt_total = conjunto_expr.length();
-                while(cnt_ajd != cnt_total && conjunto_expr.length() > 0 && !arvore.isClosed()){
-                    for(int ajd = 0; ajd < conjunto_expr.length();ajd++){
-                        cnt_ajd++;
-                        /*vamos percorrer o vetor e sempre que acharmos uma , pulamos ela e passamos pra proxima posicao do vector auxiliar
-                            Por exemplo, no conjunto {(Q v P), Q,(J & P)} o vector vai ficar
-                            auxiliar[0] = (Q v P)
-                            auxiliar[1] = Q
-                            auxiliar[2] = (J & P)
-                        */
-                        if(conjunto_expr[ajd]==','){
-                            ajd++;
-                        }
-                        else{
-                            vet_auxiliar[ajd]+=conjunto_expr[ajd];
-                        }
-                        auxiliar = arvore.insertFront(vet_auxiliar[ajd],true);
+                int a = 0;
+                for(int ajd = 0; ajd < conjunto_expr.length();ajd++){
+                    cnt_ajd++;
+                    /*vamos percorrer o vetor e sempre que acharmos uma , pulamos ela e passamos pra proxima posicao do vector auxiliar
+                        Por exemplo, no conjunto {(Q v P), Q,(J & P)} o vector vai ficar
+                        auxiliar[0] = (Q v P)
+                        auxiliar[1] = Q
+                        auxiliar[2] = (J & P)
+                    */
+                    if(conjunto_expr[ajd]==','){
+                        a++;
                     }
-                    if(auxiliar[0]->checkContradiction()){
-                        auxiliar[0]->markContradiction();
+                    else if(conjunto_expr[ajd] != ' '){
+                        vet_auxiliar[a].push_back(conjunto_expr[ajd]);
                     }
-                    auxiliar.clear();
+                    if(ajd == conjunto_expr.size() - 1 || conjunto_expr[ajd + 1] == ','){
+                        cout << vet_auxiliar[a] << endl;
+                        auxiliar = arvore.insertFront(vet_auxiliar[a],true);
+                    }
                 }
             }
 
@@ -187,7 +184,7 @@ int main() {
                         achar_subExpr(proposicao[i], &substring_1, &substring_2);
                         if(!valor){
                             //caso seja falso, nao bifurca, substring 1 e verdadeira e substring2 e falsa;
-                            folhas = appNodes[aux]->insertFront(substring_1, !valor, substring_1, valor);
+                            folhas = appNodes[aux]->insertFront(substring_1, !valor, substring_2, valor);
                         } 
                         else{
                             //caso seja verdadeiro, bifurca em casos de substring 1 ser falso e substring 2 ser verdadeiro
@@ -202,15 +199,29 @@ int main() {
                     appNodes[aux]->markApplied();
                 }
             }
-
             saida << "Problema #" << i + 1 << endl;
+             /*  
+                Problemas:
+            1 = tautologia
+            2 = refutavel
+            3 = insatisfativel
+            4 = satisfativel
+            5 = consequencia logica
 
+                Operadores:
+            & = E
+            v = Ou
+            ~ = Nao
+            > = Implicaçao
+
+            */
+           arvore.printTree();
             if(problema[i]==1) {
-                if(arvore.isClosed()){
-                   saida << "Nao, nao e satisfativel." << endl; 
+                if(!arvore.isClosed()){
+                   saida << "Nao, nao e tautologia." << endl; 
                 } 
                 else{
-                    saida << "Sim, e satisfativel." << endl;
+                    saida << "Sim, e tautologia." << endl;
                 } 
             }
             else if(problema[i]==2) {
@@ -223,29 +234,28 @@ int main() {
             }
             else if(problema[i]==3) {
                 if(arvore.isClosed()){
-                    saida << "Sim, e tautologia." << endl;
-                } 
-                else{
-                    saida << "Nao, nao e tautologia." << endl;
-                } 
-            }
-            else if(problema[i]==4) {
-                if(arvore.isClosed()){
                     saida << "Sim, e insatisfativel." << endl;
                 } 
                 else{
                     saida << "Nao, nao e insatisfativel." << endl;
+                } 
+            }
+            else if(problema[i]==4) {
+                if(!arvore.isClosed()){
+                    saida << "Sim, e satisfativel." << endl;
+                } 
+                else{
+                    saida << "Nao, nao e satisfativel." << endl;
                 }
             }
             else {
-                if(arvore.isClosed()){
+                if(!arvore.isClosed()){
                    saida << "Sim, e consequencia logica." << endl; 
                 } 
                 else{
                     saida << "Nao, nao e consequencia logica." << endl;
                 }
             }
-
             restantes--;
             if(restantes > 0) saida << endl;
 
@@ -281,23 +291,8 @@ string nega_prop(string expressao){
     int aux2 = achei;
     int par_esq = 0, par_dir = 0;
     string nova_expressao;
-    if(expressao[1]!= '('){
-        while(aux < expressao.length() && expressao[aux]!= ')'){
-            nova_expressao+=expressao[aux];
-            aux++;
-        }
-    }
-    else{
-        while(aux2 < expressao.length() && par_esq!=par_dir){
-            if(expressao[aux2] == '('){
-                par_esq++;
-            }
-            else if(expressao[aux2] == ')'){
-                par_dir++;
-            }
-            nova_expressao+=expressao[aux2];
-            aux2++;
-        }
+    for(int i=2; i<expressao.size()-1; i++){
+        nova_expressao.push_back(expressao[i]);
     }
     return nova_expressao;
 }
