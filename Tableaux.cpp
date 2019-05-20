@@ -49,8 +49,8 @@ int main() {
             /*AQUI TA O PROBLEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             Em problemas de consequencia lógica ele corre até o FODENOD ULTIMO ')' e por isso ele copia uma expressao INTEIRA pra o vetor.*/
             //se o enunciado começa com (
-            size_t ret = enunciados[i].rfind(')');//procuramos até a ultima ocorrencia do )
-            for(int j = 0; j <= ret; j++){
+            size_t ret = enunciados[i].rfind('e');//procuramos até a ultima ocorrencia do 'e'
+            for(int j = 0; j < ret; j++){
                 proposicao[i].push_back(enunciados[i][j]);
             }
         }
@@ -65,13 +65,11 @@ int main() {
             3 = insatisfativel
             4 = satisfativel
             5 = consequencia logica
-
                 Operadores:
             & = E
             v = Ou
             ~ = Nao
             > = Implicaçao
-
             */
 
             if(problema[i] == 1){
@@ -207,13 +205,11 @@ int main() {
             3 = insatisfativel
             4 = satisfativel
             5 = consequencia logica
-
                 Operadores:
             & = E
             v = Ou
             ~ = Nao
             > = Implicaçao
-
             */
            arvore.printTree();
             if(problema[i]==1) {
