@@ -25,7 +25,7 @@ int main() {
     ifstream entrada;
     ofstream saida;
     saida.open("Saida.out");
-    entrada.open("testzada.in");
+    entrada.open("Entrada.in");
     
     // ---- variaveis ----
     string enunciados[(int)1e4], proposicao[(int)1e4]; //vetor enunciado recebe pergunta / vetor proposicao apenas as proposicoes (substrings da pergunta)
@@ -46,11 +46,8 @@ int main() {
     entrada.close();
     for(int i = 0; i < n_enunciados;i++){
         if(enunciados[i][0] == '('){
-            /*AQUI TA O PROBLEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-            Em problemas de consequencia lógica ele corre até o FODENOD ULTIMO ')' e por isso ele copia uma expressao INTEIRA pra o vetor.*/
-            //se o enunciado começa com (
-            size_t ret = enunciados[i].rfind('e');//procuramos até a ultima ocorrencia do 'e'
-            for(int j = 0; j < ret; j++){
+            size_t ret = enunciados[i].find('e');//procuramos até a ultima ocorrencia do 'e'
+            for(int j = 0; j < ret-1; j++){
                 proposicao[i].push_back(enunciados[i][j]);
             }
         }
@@ -213,11 +210,11 @@ int main() {
             */
            arvore.printTree();
             if(problema[i]==1) {
-                if(!arvore.isClosed()){
-                   saida << "Nao, nao e tautologia." << endl; 
+                if(arvore.isClosed()){
+                   saida << "Sim, e tautologia." << endl; 
                 } 
                 else{
-                    saida << "Sim, e tautologia." << endl;
+                    saida << "Nao, nao e tautologia." << endl;
                 } 
             }
             else if(problema[i]==2) {
@@ -252,10 +249,14 @@ int main() {
                     saida << "Nao, nao e consequencia logica." << endl;
                 }
             }
+            for(int ajuda = 0 ; ajuda <5;ajuda ++){
+                cout<<proposicao[i]<<endl;
+            }
             restantes--;
             if(restantes > 0) saida << endl;
 
     }
+    
     saida.close();
     return 0;
 }
@@ -324,24 +325,25 @@ int achar_problema(string frase){
             5 = consequencia logica
     */
     int problema;
-    if(frase.find("tautologia")!= string::npos){
+    size_t pos_e = frase.find('e');
+    if((frase[pos_e + 2]) == 't'){
         //se achar "tautologia" na string, o problema é saber se é tautologia
         problema = 1;
         }
-    else if(frase.find("refutavel")!= string::npos){
+    else if((frase[pos_e + 2]) == 'r'){
         //se achar "refutavel" na string, o problema é saber se é refutável
         problema = 2;
     }
-    else if(frase.find("insatisfativel")!= string::npos){
+    else if((frase[pos_e + 2]) == 'i'){
         //se achar "insatisfativel" na string, o problema é saber se é insat.
         //procuramos insat antes de satisfativel pois satisfativel e uma substring de insatisfativel
         problema = 3;
         }
-    else if(frase.find("satisfativel")!= string::npos){
+    else if((frase[pos_e + 2]) == 's'){
         //se achar "satisfativel" na string, o problema é saber se é sat.
         problema = 4;
     }
-    else if(frase.find("consequencia logica de")!= string::npos){ 
+    else{ 
         problema = 5;
         }
         return problema;
